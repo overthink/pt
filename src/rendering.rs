@@ -1,5 +1,5 @@
 use crate::point::Point;
-use crate::scene::Scene;
+use crate::scene::{Scene, Sphere};
 use crate::vector::Vector3;
 
 #[derive(Debug)]
@@ -50,5 +50,27 @@ impl Ray {
             }
             .normalize(),
         }
+    }
+}
+
+pub trait Intersectable {
+    fn intersect(&self, ray: &Ray) -> bool;
+}
+
+impl Intersectable for Sphere {
+    // see https://bheisler.github.io/post/writing-raytracer-in-rust-part-1/ for good explanation
+    fn intersect(&self, ray: &Ray) -> bool {
+        let to_sphere_center: Vector3 = &self.center - &ray.origin;
+        // find the adjacent side of the right triangle where to_sphere_center is the hypoteneuse
+        let adj = to_sphere_center.dot(&ray.direction);
+        // find length-squared of opposite side (pythagorean, minus square root)
+        let opp_squared = to_sphere_center.dot(&to_sphere_center) - (adj * adj);
+        //        println!(
+        //            "{:?}, opp_squared: {}, radius^2: {}",
+        //            to_sphere_center,
+        //            opp_squared,
+        //            self.radius * self.radius
+        //        );
+        opp_squared < (self.radius * self.radius)
     }
 }

@@ -30,11 +30,15 @@ impl Vector3 {
 
     // aka manitude, Eudclidian norm, l2-norm
     pub fn length(&self) -> f64 {
-        (self.x * self.x + self.y * self.y * self.z * self.z).sqrt()
+        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
     }
 
     // divide each vector component by its length
     pub fn normalize(&self) -> Vector3 {
         self * self.length().recip()
+    }
+
+    pub fn dot(&self, other: &Vector3) -> f64 {
+        self.x * other.x + self.y * other.y + self.z * other.z
     }
 }

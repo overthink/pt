@@ -9,19 +9,35 @@ mod rendering;
 pub mod scene;
 pub mod vector;
 
-use image::RgbImage;
+use image::Rgba;
+use image::RgbaImage;
 
-use crate::color::Color;
-use crate::point::Point;
-use crate::scene::{Scene, Sphere};
+use crate::rendering::{Intersectable, Ray};
+use crate::scene::Scene;
 
-pub fn render(scene: &Scene) -> RgbImage {
-    //DynamicImage::new_rgb8(scene.width, scene.height)
-    RgbImage::new(scene.width, scene.height)
+pub fn render(scene: &Scene) -> RgbaImage {
+    let mut image = RgbaImage::new(scene.width, scene.height);
+    let black = Rgba([0, 0, 0, 255]);
+
+    for x in 0..scene.width {
+        for y in 0..scene.height {
+            let ray = Ray::create_prime(x, y, scene);
+
+            if scene.sphere.intersect(&ray) {
+                image.put_pixel(x, y, scene.sphere.color.to_rgba());
+            } else {
+                image.put_pixel(x, y, black);
+            }
+        }
+    }
+    image
 }
 
 #[test]
 fn test_can_render_scene() {
+    use crate::color::Color;
+    use crate::point::Point;
+    use crate::scene::Sphere;
     let scene = Scene {
         width: 800,
         height: 600,
@@ -44,4 +60,5 @@ fn test_can_render_scene() {
     let img = render(&scene);
     assert_eq!(scene.width, img.width());
     assert_eq!(scene.height, img.height());
+    img.save("c:\\temp\\foo.png").unwrap();
 }
