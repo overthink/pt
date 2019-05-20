@@ -1,9 +1,9 @@
 [package]
 name = "pt"
 version = "0.1.0"
-authors = ["mark"]
+authors = ["Mark Feeney <mark.feeney@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-sdl2 = { version = "0.32", features = ["bundled", "static-link"] }
-# sdl2 = { version = "0.32", features = ["bundled", "gfx", "static-link"] }
+rand = "0.6.5"
+image = "0.21.1"
