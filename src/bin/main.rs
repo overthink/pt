@@ -2,7 +2,7 @@ extern crate pt;
 
 use pt::color::Color;
 use pt::point::Point;
-use pt::scene::{Element, Plane, Scene, Sphere};
+use pt::scene::{Element, Light, Plane, Scene, Sphere};
 use pt::vector::Vector3;
 
 fn scene() -> Scene {
@@ -39,9 +39,9 @@ fn scene() -> Scene {
             }),
             Element::Sphere(Sphere {
                 center: Point {
-                    x: -4.5,
+                    x: -2.5,
                     y: 2.0,
-                    z: -7.0,
+                    z: -6.0,
                 },
                 radius: 2.0,
                 color: Color {
@@ -68,6 +68,19 @@ fn scene() -> Scene {
                 },
             }),
         ],
+        light: Light {
+            direction: Vector3 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            },
+            color: Color {
+                red: 0.0,
+                green: 0.0,
+                blue: 0.0,
+            },
+            intensity: 0.0,
+        },
     }
 }
 

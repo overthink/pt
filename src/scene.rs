@@ -10,6 +10,12 @@ pub struct Sphere {
     pub color: Color,
 }
 
+impl Sphere {
+    fn surface_normal(&self, hit_point: &Point) -> Vector3 {
+        (hit_point - &self.center).normalize()
+    }
+}
+
 #[derive(Debug)]
 pub struct Intersection<'a> {
     pub distance: f64,
@@ -32,22 +38,6 @@ pub struct Plane {
     pub color: Color,
 }
 
-impl Intersectable for Plane {
-    fn intersect(&self, ray: &Ray) -> Option<f64> {
-        let normal = &self.normal;
-        let denom = normal.dot(&ray.direction);
-        if denom > 1e-6 {
-            // really close to zero == zero for us
-            let v = &self.origin - &ray.origin;
-            let distance = v.dot(&normal) / denom;
-            if distance >= 0.0 {
-                return Some(distance);
-            }
-        }
-        None
-    }
-}
-
 #[derive(Debug)]
 pub enum Element {
     Sphere(Sphere),
@@ -63,13 +53,11 @@ impl Element {
     }
 }
 
-impl Intersectable for Element {
-    fn intersect(&self, ray: &Ray) -> Option<f64> {
-        match *self {
-            Element::Sphere(ref s) => s.intersect(ray),
-            Element::Plane(ref p) => p.intersect(ray),
-        }
-    }
+#[derive(Debug)]
+pub struct Light {
+    pub direction: Vector3,
+    pub color: Color,
+    pub intensity: f32,
 }
 
 #[derive(Debug)]
@@ -78,6 +66,7 @@ pub struct Scene {
     pub height: u32,
     pub fov: f64,
     pub elements: Vec<Element>,
+    pub light: Light,
 }
 
 impl Scene {

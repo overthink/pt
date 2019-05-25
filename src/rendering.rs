@@ -1,5 +1,5 @@
 use crate::point::Point;
-use crate::scene::{Scene, Sphere};
+use crate::scene::{Element, Plane, Scene, Sphere};
 use crate::vector::Vector3;
 
 #[derive(Debug)]
@@ -56,6 +56,7 @@ impl Ray {
 pub trait Intersectable {
     // Returns distance from camera origin to point of intersection (if there is one)
     fn intersect(&self, ray: &Ray) -> Option<f64>;
+    fn surface_normal(&self, p: &Point) -> Vector3;
 }
 
 impl Intersectable for Sphere {
@@ -80,5 +81,42 @@ impl Intersectable for Sphere {
         }
         let distance = if t0 < t1 { t0 } else { t1 };
         Some(distance)
+    }
+
+    fn surface_normal(&self, p: &Point) -> Vector3 {
+        (p - &self.center).normalize()
+    }
+}
+
+impl Intersectable for Plane {
+    fn intersect(&self, ray: &Ray) -> Option<f64> {
+        let normal = &self.normal;
+        let denom = normal.dot(&ray.direction);
+        if denom > 1e-6 {
+            // really close to zero == zero for us
+            let v = &self.origin - &ray.origin;
+            let distance = v.dot(&normal) / denom;
+            if distance >= 0.0 {
+                return Some(distance);
+            }
+        }
+        None
+    }
+
+    fn surface_normal(&self, p: &Point) -> Vector3 {
+        unimplemented!()
+    }
+}
+
+impl Intersectable for Element {
+    fn intersect(&self, ray: &Ray) -> Option<f64> {
+        match *self {
+            Element::Sphere(ref s) => s.intersect(ray),
+            Element::Plane(ref p) => p.intersect(ray),
+        }
+    }
+
+    fn surface_normal(&self, p: &Point) -> Vector3 {
+        unimplemented!()
     }
 }
