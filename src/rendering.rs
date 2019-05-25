@@ -54,23 +54,31 @@ impl Ray {
 }
 
 pub trait Intersectable {
-    fn intersect(&self, ray: &Ray) -> bool;
+    // Returns distance from camera origin to point of intersection (if there is one)
+    fn intersect(&self, ray: &Ray) -> Option<f64>;
 }
 
 impl Intersectable for Sphere {
-    // see https://bheisler.github.io/post/writing-raytracer-in-rust-part-1/ for good explanation
-    fn intersect(&self, ray: &Ray) -> bool {
-        let to_sphere_center: Vector3 = &self.center - &ray.origin;
-        // find the adjacent side of the right triangle where to_sphere_center is the hypoteneuse
-        let adj = to_sphere_center.dot(&ray.direction);
-        // find length-squared of opposite side (pythagorean, minus square root)
-        let opp_squared = to_sphere_center.dot(&to_sphere_center) - (adj * adj);
-        //        println!(
-        //            "{:?}, opp_squared: {}, radius^2: {}",
-        //            to_sphere_center,
-        //            opp_squared,
-        //            self.radius * self.radius
-        //        );
-        opp_squared < (self.radius * self.radius)
+    fn intersect(&self, ray: &Ray) -> Option<f64> {
+        let vec_to_center: Vector3 = &self.center - &ray.origin;
+        let adj: f64 = vec_to_center.dot(&ray.direction);
+        let hyp2 = vec_to_center.dot(&vec_to_center); // len(v) == v.dot(v).sqrt()
+        let opp2 = hyp2 - (adj * adj);
+        let r2 = self.radius * self.radius;
+        if opp2 > r2 {
+            return None;
+        }
+        // There is an intersection, find distance from it to origin
+        let thickness = (r2 - opp2).sqrt();
+
+        // Ok, I don't get this part... :(
+        // Something to do with a ray having two points of intersetcion with the sphere?
+        let t0 = adj - thickness;
+        let t1 = adj + thickness;
+        if t0 < 0.0 && t1 < 0.0 {
+            return None;
+        }
+        let distance = if t0 < t1 { t0 } else { t1 };
+        Some(distance)
     }
 }

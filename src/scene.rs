@@ -1,17 +1,90 @@
 use crate::color::Color;
 use crate::point::Point;
-
-#[derive(Debug)]
-pub struct Scene {
-    pub width: u32,
-    pub height: u32,
-    pub fov: f64,
-    pub sphere: Sphere,
-}
+use crate::rendering::{Intersectable, Ray};
+use crate::vector::Vector3;
 
 #[derive(Debug)]
 pub struct Sphere {
     pub center: Point,
     pub radius: f64,
     pub color: Color,
+}
+
+#[derive(Debug)]
+pub struct Intersection<'a> {
+    pub distance: f64,
+    pub element: &'a Element,
+}
+
+impl<'a> Intersection<'a> {
+    pub fn new(distance: f64, element: &Element) -> Intersection {
+        if !distance.is_finite() {
+            panic!("Intersection must have finite distance");
+        }
+        Intersection { distance, element }
+    }
+}
+
+#[derive(Debug)]
+pub struct Plane {
+    pub origin: Point,
+    pub normal: Vector3,
+    pub color: Color,
+}
+
+impl Intersectable for Plane {
+    fn intersect(&self, ray: &Ray) -> Option<f64> {
+        let normal = &self.normal;
+        let denom = normal.dot(&ray.direction);
+        if denom > 1e-6 {
+            // really close to zero == zero for us
+            let v = &self.origin - &ray.origin;
+            let distance = v.dot(&normal) / denom;
+            if distance >= 0.0 {
+                return Some(distance);
+            }
+        }
+        None
+    }
+}
+
+#[derive(Debug)]
+pub enum Element {
+    Sphere(Sphere),
+    Plane(Plane),
+}
+
+impl Element {
+    pub fn color(&self) -> &Color {
+        match *self {
+            Element::Sphere(ref s) => &s.color,
+            Element::Plane(ref p) => &p.color,
+        }
+    }
+}
+
+impl Intersectable for Element {
+    fn intersect(&self, ray: &Ray) -> Option<f64> {
+        match *self {
+            Element::Sphere(ref s) => s.intersect(ray),
+            Element::Plane(ref p) => p.intersect(ray),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct Scene {
+    pub width: u32,
+    pub height: u32,
+    pub fov: f64,
+    pub elements: Vec<Element>,
+}
+
+impl Scene {
+    pub fn trace(&self, ray: &Ray) -> Option<Intersection> {
+        self.elements
+            .iter()
+            .filter_map(|e| e.intersect(ray).map(|d| Intersection::new(d, e)))
+            .min_by(|i1, i2| i1.distance.partial_cmp(&i2.distance).unwrap())
+    }
 }
