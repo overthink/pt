@@ -11,7 +11,7 @@ pub mod vector;
 use image::Rgba;
 use image::RgbaImage;
 
-use crate::rendering::Ray;
+use crate::rendering::{get_color, Ray};
 use crate::scene::Scene;
 
 pub fn render(scene: &Scene) -> RgbaImage {
@@ -23,7 +23,7 @@ pub fn render(scene: &Scene) -> RgbaImage {
             let ray = Ray::create_prime(x, y, scene);
             let intersection = scene.trace(&ray);
             let color = match intersection {
-                Some(intersection) => intersection.element.color().to_rgba(),
+                Some(intersection) => get_color(scene, &ray, &intersection).to_rgba(),
                 _ => sky,
             };
             image.put_pixel(x, y, color);

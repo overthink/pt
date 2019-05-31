@@ -23,6 +23,7 @@ fn scene() -> Scene {
                     green: 1.0,
                     blue: 0.0,
                 },
+                albedo: 5.0,
             }),
             Element::Sphere(Sphere {
                 center: Point {
@@ -36,6 +37,7 @@ fn scene() -> Scene {
                     green: 0.0,
                     blue: 0.0,
                 },
+                albedo: 3.0,
             }),
             Element::Sphere(Sphere {
                 center: Point {
@@ -49,6 +51,7 @@ fn scene() -> Scene {
                     green: 0.0,
                     blue: 1.0,
                 },
+                albedo: 6.0,
             }),
             Element::Plane(Plane {
                 origin: Point {
@@ -66,20 +69,21 @@ fn scene() -> Scene {
                     green: 0.3,
                     blue: 0.3,
                 },
+                albedo: 1.0,
             }),
         ],
         light: Light {
             direction: Vector3 {
-                x: 0.0,
-                y: 0.0,
+                x: -1.0,
+                y: -1.0,
                 z: 0.0,
             },
             color: Color {
-                red: 0.0,
-                green: 0.0,
-                blue: 0.0,
+                red: 1.0,
+                green: 1.0,
+                blue: 1.0,
             },
-            intensity: 0.0,
+            intensity: 0.8,
         },
     }
 }

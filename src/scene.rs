@@ -8,11 +8,12 @@ pub struct Sphere {
     pub center: Point,
     pub radius: f64,
     pub color: Color,
+    pub albedo: f32,
 }
 
 impl Sphere {
-    fn surface_normal(&self, hit_point: &Point) -> Vector3 {
-        (hit_point - &self.center).normalize()
+    pub fn surface_normal(&self, hit_point: &Point) -> Vector3 {
+        (*hit_point - self.center).normalize()
     }
 }
 
@@ -36,6 +37,7 @@ pub struct Plane {
     pub origin: Point,
     pub normal: Vector3,
     pub color: Color,
+    pub albedo: f32,
 }
 
 #[derive(Debug)]
@@ -49,6 +51,13 @@ impl Element {
         match *self {
             Element::Sphere(ref s) => &s.color,
             Element::Plane(ref p) => &p.color,
+        }
+    }
+
+    pub fn albedo(&self) -> f32 {
+        match *self {
+            Element::Sphere(ref s) => s.albedo,
+            Element::Plane(ref p) => p.albedo,
         }
     }
 }

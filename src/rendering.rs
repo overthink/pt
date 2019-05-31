@@ -1,5 +1,6 @@
+use crate::color::Color;
 use crate::point::Point;
-use crate::scene::{Element, Plane, Scene, Sphere};
+use crate::scene::{Element, Intersection, Plane, Scene, Sphere};
 use crate::vector::Vector3;
 
 #[derive(Debug)]
@@ -61,7 +62,7 @@ pub trait Intersectable {
 
 impl Intersectable for Sphere {
     fn intersect(&self, ray: &Ray) -> Option<f64> {
-        let vec_to_center: Vector3 = &self.center - &ray.origin;
+        let vec_to_center: Vector3 = self.center - ray.origin;
         let adj: f64 = vec_to_center.dot(&ray.direction);
         let hyp2 = vec_to_center.dot(&vec_to_center); // len(v) == v.dot(v).sqrt()
         let opp2 = hyp2 - (adj * adj);
@@ -84,7 +85,7 @@ impl Intersectable for Sphere {
     }
 
     fn surface_normal(&self, p: &Point) -> Vector3 {
-        (p - &self.center).normalize()
+        (*p - self.center).normalize()
     }
 }
 
@@ -94,7 +95,7 @@ impl Intersectable for Plane {
         let denom = normal.dot(&ray.direction);
         if denom > 1e-6 {
             // really close to zero == zero for us
-            let v = &self.origin - &ray.origin;
+            let v = self.origin - ray.origin;
             let distance = v.dot(&normal) / denom;
             if distance >= 0.0 {
                 return Some(distance);
@@ -104,7 +105,7 @@ impl Intersectable for Plane {
     }
 
     fn surface_normal(&self, p: &Point) -> Vector3 {
-        unimplemented!()
+        -self.normal
     }
 }
 
@@ -117,6 +118,24 @@ impl Intersectable for Element {
     }
 
     fn surface_normal(&self, p: &Point) -> Vector3 {
-        unimplemented!()
+        match *self {
+            Element::Sphere(ref sphere) => sphere.surface_normal(p),
+            Element::Plane(ref plane) => plane.surface_normal(p),
+        }
     }
+}
+
+pub fn get_color(scene: &Scene, ray: &Ray, intersection: &Intersection) -> Color {
+    let hit_point = ray.origin + (ray.direction * intersection.distance);
+    let surface_normal = intersection.element.surface_normal(&hit_point);
+    let direction_to_light = -scene.light.direction.normalize();
+    let light_power: f32 =
+        (surface_normal.dot(&direction_to_light) as f32).max(0.0) * scene.light.intensity;
+    let light_reflected = intersection.element.albedo() / std::f32::consts::PI;
+    let color = intersection.element.color().clone()
+        * scene.light.color.clone()
+        * light_power
+        * light_reflected;
+    // println!("{:?}", color);
+    color.clamp()
 }
