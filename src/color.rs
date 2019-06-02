@@ -14,9 +14,9 @@ fn gamma_encode(linear: f32) -> f32 {
     linear.powf(1.0 / GAMMA)
 }
 
-fn gamma_decode(encoded: f32) -> f32 {
-    encoded.powf(GAMMA)
-}
+//fn gamma_decode(encoded: f32) -> f32 {
+//    encoded.powf(GAMMA)
+//}
 
 impl Color {
     pub fn to_rgba(&self) -> Rgba<u8> {
