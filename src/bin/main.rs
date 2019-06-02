@@ -2,7 +2,7 @@ extern crate pt;
 
 use pt::color::Color;
 use pt::point::Point;
-use pt::scene::{Element, Light, Plane, Scene, Sphere};
+use pt::scene::{DirectionalLight, Element, Light, Plane, Scene, Sphere, SphericalLight};
 use pt::vector::Vector3;
 
 fn scene() -> Scene {
@@ -74,7 +74,7 @@ fn scene() -> Scene {
         ],
         shadow_bias: 1e-13,
         lights: vec![
-            Light {
+            Light::Directional(DirectionalLight {
                 direction: Vector3 {
                     x: -0.8,
                     y: -1.0,
@@ -86,8 +86,8 @@ fn scene() -> Scene {
                     blue: 1.0,
                 },
                 intensity: 0.8,
-            },
-            Light {
+            }),
+            Light::Directional(DirectionalLight {
                 direction: Vector3 {
                     x: 0.8,
                     y: -1.0,
@@ -99,7 +99,20 @@ fn scene() -> Scene {
                     blue: 0.2,
                 },
                 intensity: 0.6,
-            },
+            }),
+            Light::Spherical(SphericalLight {
+                position: Point {
+                    x: -1.0,
+                    y: 0.5,
+                    z: -1.0,
+                },
+                color: Color {
+                    red: 0.1,
+                    green: 0.1,
+                    blue: 0.8,
+                },
+                intensity: 100.0,
+            }),
         ],
     }
 }

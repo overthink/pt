@@ -62,11 +62,61 @@ impl Element {
     }
 }
 
+// Light so far away that all rays coming from it are effectively parallel
 #[derive(Debug)]
-pub struct Light {
+pub struct DirectionalLight {
     pub direction: Vector3,
     pub color: Color,
     pub intensity: f32,
+}
+
+// Point source light near the scene
+#[derive(Debug)]
+pub struct SphericalLight {
+    pub position: Point,
+    pub color: Color,
+    pub intensity: f32,
+}
+
+#[derive(Debug)]
+pub enum Light {
+    Directional(DirectionalLight),
+    Spherical(SphericalLight),
+}
+
+impl Light {
+    pub fn color(&self) -> Color {
+        match *self {
+            Light::Directional(ref d) => d.color,
+            Light::Spherical(ref s) => s.color,
+        }
+    }
+
+    // Returns a vector pointing to the light from the given point.
+    pub fn direction_from(&self, hit_point: &Point) -> Vector3 {
+        match *self {
+            Light::Directional(ref d) => -d.direction,
+            Light::Spherical(ref s) => (s.position - *hit_point).normalize(),
+        }
+    }
+
+    pub fn intensity(&self, hit_point: &Point) -> f32 {
+        match *self {
+            Light::Directional(ref d) => d.intensity,
+            Light::Spherical(ref s) => {
+                let p = s.position - *hit_point;
+                let r2 = (p.x * p.x + p.y * p.y + p.z * p.z) as f32;
+                s.intensity / (4.0 * ::std::f32::consts::PI * r2)
+            }
+        }
+    }
+
+    pub fn distance(&self, hit_point: &Point) -> f64 {
+        match *self {
+            Light::Directional(_) => ::std::f64::INFINITY,
+            Light::Spherical(ref s) => (s.position - *hit_point).length(),
+        }
+    }
 }
 
 #[derive(Debug)]
