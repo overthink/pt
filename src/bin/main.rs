@@ -72,11 +72,12 @@ fn scene() -> Scene {
                 albedo: 1.0,
             }),
         ],
+        shadow_bias: 1e-13,
         light: Light {
             direction: Vector3 {
-                x: -1.0,
+                x: -0.8,
                 y: -1.0,
-                z: 0.0,
+                z: -0.4,
             },
             color: Color {
                 red: 1.0,

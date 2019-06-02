@@ -75,6 +75,7 @@ pub struct Scene {
     pub height: u32,
     pub fov: f64,
     pub elements: Vec<Element>,
+    pub shadow_bias: f64,
     pub light: Light,
 }
 
