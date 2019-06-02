@@ -1,5 +1,5 @@
 use image::Rgba;
-use std::ops::Mul;
+use std::ops::{Add, Mul};
 
 #[derive(Copy, Clone, Debug)]
 pub struct Color {
@@ -57,6 +57,18 @@ impl Mul<f32> for Color {
             red: self.red * rhs,
             green: self.green * rhs,
             blue: self.blue * rhs,
+        }
+    }
+}
+
+impl Add<Color> for Color {
+    type Output = Color;
+
+    fn add(self, rhs: Color) -> Self::Output {
+        Color {
+            red: self.red + rhs.red,
+            green: self.green + rhs.green,
+            blue: self.blue + rhs.blue,
         }
     }
 }

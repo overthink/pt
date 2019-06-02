@@ -73,19 +73,34 @@ fn scene() -> Scene {
             }),
         ],
         shadow_bias: 1e-13,
-        light: Light {
-            direction: Vector3 {
-                x: -0.8,
-                y: -1.0,
-                z: -0.4,
+        lights: vec![
+            Light {
+                direction: Vector3 {
+                    x: -0.8,
+                    y: -1.0,
+                    z: -0.4,
+                },
+                color: Color {
+                    red: 1.0,
+                    green: 1.0,
+                    blue: 1.0,
+                },
+                intensity: 0.8,
             },
-            color: Color {
-                red: 1.0,
-                green: 1.0,
-                blue: 1.0,
+            Light {
+                direction: Vector3 {
+                    x: 0.8,
+                    y: -1.0,
+                    z: -0.4,
+                },
+                color: Color {
+                    red: 1.0,
+                    green: 0.2,
+                    blue: 0.2,
+                },
+                intensity: 0.6,
             },
-            intensity: 0.8,
-        },
+        ],
     }
 }
 
