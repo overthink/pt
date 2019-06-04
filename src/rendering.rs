@@ -54,10 +54,17 @@ impl Ray {
     }
 }
 
+#[derive(Debug)]
+pub struct TextureCoords {
+    pub x: f32,
+    pub y: f32,
+}
+
 pub trait Intersectable {
     // Returns distance from camera origin to point of intersection (if there is one)
     fn intersect(&self, ray: &Ray) -> Option<f64>;
-    fn surface_normal(&self, p: &Point) -> Vector3;
+    fn surface_normal(&self, hit_point: &Point) -> Vector3;
+    fn texture_coords(&self, hit_point: &Point) -> TextureCoords;
 }
 
 impl Intersectable for Sphere {
@@ -84,8 +91,16 @@ impl Intersectable for Sphere {
         Some(distance)
     }
 
-    fn surface_normal(&self, p: &Point) -> Vector3 {
-        (*p - self.center).normalize()
+    fn surface_normal(&self, hit_point: &Point) -> Vector3 {
+        (*hit_point - self.center).normalize()
+    }
+
+    fn texture_coords(&self, hit_point: &Point) -> TextureCoords {
+        let hit_vec = *hit_point - self.center; // vector from center to point of intersection
+        TextureCoords {
+            x: (1.0 + (hit_vec.z.atan2(hit_vec.x) as f32) / std::f32::consts::PI) * 0.5,
+            y: (hit_vec.y / self.radius).acos() as f32 / std::f32::consts::PI,
+        }
     }
 }
 
@@ -107,6 +122,35 @@ impl Intersectable for Plane {
     fn surface_normal(&self, _: &Point) -> Vector3 {
         -self.normal
     }
+
+    fn texture_coords(&self, hit_point: &Point) -> TextureCoords {
+        // We need basis vectors for the plane. We'll get our x axis by crossing the surface normal
+        // and the forward vector. If the surface normal happens to BE the forward vector, we'll
+        // cross the normal with the up vector). This gives us a vector in our plane to be our x
+        // axis. Then we cross that with the surface normal to get our y-axis.
+        let mut x_axis = self.normal.cross(&Vector3 {
+            x: 0.0,
+            y: 0.0,
+            z: 1.0, // forward vector
+        });
+        if x_axis.length() == 0.0 {
+            x_axis = self.normal.cross(&Vector3 {
+                x: 0.0,
+                y: 1.0, // up vector
+                z: 0.0,
+            });
+        }
+        let y_axis = self.normal.cross(&x_axis);
+
+        // Now we need to map the hit point to our new x and y axes. Do this by projecting the hit
+        // vector onto each of our axes.
+        let hit_vec = *hit_point - self.origin;
+
+        TextureCoords {
+            x: hit_vec.dot(&x_axis) as f32,
+            y: hit_vec.dot(&y_axis) as f32,
+        }
+    }
 }
 
 impl Intersectable for Element {
@@ -123,11 +167,19 @@ impl Intersectable for Element {
             Element::Plane(ref plane) => plane.surface_normal(p),
         }
     }
+
+    fn texture_coords(&self, hit_point: &Point) -> TextureCoords {
+        match self {
+            Element::Sphere(ref s) => s.texture_coords(hit_point),
+            Element::Plane(ref p) => p.texture_coords(hit_point),
+        }
+    }
 }
 
 pub fn get_color(scene: &Scene, ray: &Ray, intersection: &Intersection) -> Color {
     let hit_point = ray.origin + (ray.direction * intersection.distance);
     let surface_normal = intersection.element.surface_normal(&hit_point);
+    let texture_coords = intersection.element.texture_coords(&hit_point);
 
     let mut color = Color {
         red: 0.0,
@@ -150,10 +202,16 @@ pub fn get_color(scene: &Scene, ray: &Ray, intersection: &Intersection) -> Color
         };
         let light_power: f32 =
             (surface_normal.dot(&direction_to_light) as f32).max(0.0) * light_intensity;
-        let light_reflected = intersection.element.albedo() / std::f32::consts::PI;
+        let light_reflected = intersection.element.material().albedo / std::f32::consts::PI;
 
         let light_color = light.color() * light_power * light_reflected;
-        color = color + (*intersection.element.color() * light_color);
+        color = color
+            + (intersection
+                .element
+                .material()
+                .coloration
+                .color(&texture_coords)
+                * light_color);
         // println!("{:?}", color);
     }
 

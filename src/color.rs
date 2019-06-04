@@ -14,9 +14,9 @@ fn gamma_encode(linear: f32) -> f32 {
     linear.powf(1.0 / GAMMA)
 }
 
-//fn gamma_decode(encoded: f32) -> f32 {
-//    encoded.powf(GAMMA)
-//}
+fn gamma_decode(encoded: f32) -> f32 {
+    encoded.powf(GAMMA)
+}
 
 impl Color {
     pub fn to_rgba(&self) -> Rgba<u8> {
@@ -26,6 +26,14 @@ impl Color {
             (gamma_encode(self.blue) * 255.0) as u8,
             255,
         ])
+    }
+
+    pub fn from_rgba(rgba: Rgba<u8>) -> Color {
+        Color {
+            red: gamma_decode((rgba.data[0] as f32) / 255.0),
+            green: gamma_decode((rgba.data[1] as f32) / 255.0),
+            blue: gamma_decode((rgba.data[2] as f32) / 255.0),
+        }
     }
 
     pub fn clamp(&self) -> Color {

@@ -1,9 +1,18 @@
 extern crate pt;
 
+use image::{DynamicImage, RgbaImage};
 use pt::color::Color;
 use pt::point::Point;
-use pt::scene::{DirectionalLight, Element, Light, Plane, Scene, Sphere, SphericalLight};
+use pt::scene::{
+    Coloration, DirectionalLight, Element, Light, Material, Plane, Scene, Sphere, SphericalLight,
+};
 use pt::vector::Vector3;
+
+// ideally we could load the texture once, but somewhere downstream it gets consumed -- I think the
+// get_pixel call in the renderer?
+fn checkerboard() -> DynamicImage {
+    image::open("src\\bin\\checkerboard.png").unwrap()
+}
 
 fn scene() -> Scene {
     Scene {
@@ -18,12 +27,14 @@ fn scene() -> Scene {
                     z: -5.0,
                 },
                 radius: 1.0,
-                color: Color {
-                    red: 0.0,
-                    green: 1.0,
-                    blue: 0.0,
+                material: Material {
+                    coloration: Coloration::Color(Color {
+                        red: 0.0,
+                        green: 1.0,
+                        blue: 0.0,
+                    }),
+                    albedo: 5.0,
                 },
-                albedo: 5.0,
             }),
             Element::Sphere(Sphere {
                 center: Point {
@@ -32,12 +43,14 @@ fn scene() -> Scene {
                     z: -6.0,
                 },
                 radius: 0.5,
-                color: Color {
-                    red: 1.0,
-                    green: 0.0,
-                    blue: 0.0,
+                material: Material {
+                    coloration: Coloration::Color(Color {
+                        red: 1.0,
+                        green: 0.0,
+                        blue: 0.0,
+                    }),
+                    albedo: 3.0,
                 },
-                albedo: 3.0,
             }),
             Element::Sphere(Sphere {
                 center: Point {
@@ -46,12 +59,10 @@ fn scene() -> Scene {
                     z: -6.0,
                 },
                 radius: 2.0,
-                color: Color {
-                    red: 0.0,
-                    green: 0.0,
-                    blue: 1.0,
+                material: Material {
+                    coloration: Coloration::Texture(checkerboard()),
+                    albedo: 6.0,
                 },
-                albedo: 6.0,
             }),
             Element::Plane(Plane {
                 origin: Point {
@@ -64,12 +75,10 @@ fn scene() -> Scene {
                     y: -1.0,
                     z: 0.0,
                 },
-                color: Color {
-                    red: 0.3,
-                    green: 0.3,
-                    blue: 0.3,
+                material: Material {
+                    coloration: Coloration::Texture(checkerboard()),
+                    albedo: 1.0,
                 },
-                albedo: 1.0,
             }),
         ],
         shadow_bias: 1e-13,
@@ -103,7 +112,7 @@ fn scene() -> Scene {
             Light::Spherical(SphericalLight {
                 position: Point {
                     x: -1.0,
-                    y: 0.5,
+                    y: 1.5,
                     z: -1.0,
                 },
                 color: Color {
@@ -120,7 +129,7 @@ fn scene() -> Scene {
 // Entry point for creating renderings.
 fn main() {
     let scene = scene();
-    let img = pt::render(&scene);
+    let img: RgbaImage = pt::render(&scene);
     assert_eq!(scene.width, img.width());
     assert_eq!(scene.height, img.height());
     img.save("c:\\temp\\foo.png").unwrap();
