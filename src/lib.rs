@@ -23,7 +23,7 @@ pub fn render(scene: &Scene) -> RgbaImage {
             let ray = Ray::create_prime(x, y, scene);
             let intersection = scene.trace(&ray);
             let color = match intersection {
-                Some(intersection) => get_color(scene, &ray, &intersection).to_rgba(),
+                Some(intersection) => get_color(scene, &ray, &intersection, 0).to_rgba(),
                 _ => sky,
             };
             image.put_pixel(x, y, color);

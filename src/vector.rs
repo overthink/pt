@@ -1,4 +1,4 @@
-use std::ops::{Mul, Neg};
+use std::ops::{Add, Mul, Neg, Sub};
 
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
@@ -6,30 +6,6 @@ pub struct Vector3 {
     pub x: f64,
     pub y: f64,
     pub z: f64,
-}
-
-impl Mul<f64> for Vector3 {
-    type Output = Vector3;
-
-    fn mul(self, rhs: f64) -> Self::Output {
-        Vector3 {
-            x: self.x * rhs,
-            y: self.y * rhs,
-            z: self.z * rhs,
-        }
-    }
-}
-
-impl Neg for Vector3 {
-    type Output = Vector3;
-
-    fn neg(self) -> Self::Output {
-        Vector3 {
-            x: -self.x,
-            y: -self.y,
-            z: -self.z,
-        }
-    }
 }
 
 impl Vector3 {
@@ -60,6 +36,62 @@ impl Vector3 {
             x: self.y * other.z - self.z * other.y,
             y: self.z * other.x - self.x * other.z,
             z: self.x * other.y - self.y * other.x,
+        }
+    }
+}
+
+impl Mul<f64> for Vector3 {
+    type Output = Vector3;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        Vector3 {
+            x: self.x * rhs,
+            y: self.y * rhs,
+            z: self.z * rhs,
+        }
+    }
+}
+
+impl Mul<Vector3> for f64 {
+    type Output = Vector3;
+
+    fn mul(self, rhs: Vector3) -> Self::Output {
+        rhs * self
+    }
+}
+
+impl Add for Vector3 {
+    type Output = Vector3;
+
+    fn add(self, rhs: Vector3) -> Self::Output {
+        Vector3 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+        }
+    }
+}
+
+impl Sub for Vector3 {
+    type Output = Vector3;
+
+    fn sub(self, rhs: Vector3) -> Self::Output {
+        Vector3 {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
+        }
+    }
+}
+
+impl Neg for Vector3 {
+    type Output = Vector3;
+
+    fn neg(self) -> Self::Output {
+        Vector3 {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
         }
     }
 }

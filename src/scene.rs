@@ -44,9 +44,16 @@ impl Coloration {
 }
 
 #[derive(Debug)]
+pub enum SurfaceType {
+    Diffuse,
+    Reflective { reflectivity: f32 },
+}
+
+#[derive(Debug)]
 pub struct Material {
     pub coloration: Coloration,
     pub albedo: f32,
+    pub surface: SurfaceType,
 }
 
 #[derive(Debug)]
@@ -162,8 +169,9 @@ pub struct Scene {
     pub height: u32,
     pub fov: f64,
     pub elements: Vec<Element>,
-    pub shadow_bias: f64, // hack to ensure intersection points are outside their elements
     pub lights: Vec<Light>,
+    pub shadow_bias: f64, // hack to ensure intersection points are outside their elements
+    pub max_recursion_depth: u32,
 }
 
 impl Scene {

@@ -5,6 +5,7 @@ use pt::color::Color;
 use pt::point::Point;
 use pt::scene::{
     Coloration, DirectionalLight, Element, Light, Material, Plane, Scene, Sphere, SphericalLight,
+    SurfaceType,
 };
 use pt::vector::Vector3;
 
@@ -16,17 +17,17 @@ fn checkerboard() -> DynamicImage {
 
 fn scene() -> Scene {
     Scene {
-        width: 800,
-        height: 600,
+        width: 1600,
+        height: 900,
         fov: 90.0,
         elements: vec![
             Element::Sphere(Sphere {
                 center: Point {
-                    x: 0.0,
-                    y: 0.0,
-                    z: -5.0,
+                    x: 0.3,
+                    y: 0.5,
+                    z: -3.0,
                 },
-                radius: 1.0,
+                radius: 0.85,
                 material: Material {
                     coloration: Coloration::Color(Color {
                         red: 0.0,
@@ -34,12 +35,13 @@ fn scene() -> Scene {
                         blue: 0.0,
                     }),
                     albedo: 5.0,
+                    surface: SurfaceType::Reflective { reflectivity: 0.3 },
                 },
             }),
             Element::Sphere(Sphere {
                 center: Point {
                     x: 3.5,
-                    y: 0.0,
+                    y: -0.2,
                     z: -6.0,
                 },
                 radius: 0.5,
@@ -50,6 +52,9 @@ fn scene() -> Scene {
                         blue: 0.0,
                     }),
                     albedo: 3.0,
+                    surface: SurfaceType::Reflective {
+                        reflectivity: 0.001,
+                    },
                 },
             }),
             Element::Sphere(Sphere {
@@ -62,6 +67,7 @@ fn scene() -> Scene {
                 material: Material {
                     coloration: Coloration::Texture(checkerboard()),
                     albedo: 6.0,
+                    surface: SurfaceType::Diffuse,
                 },
             }),
             Element::Plane(Plane {
@@ -78,6 +84,7 @@ fn scene() -> Scene {
                 material: Material {
                     coloration: Coloration::Texture(checkerboard()),
                     albedo: 1.0,
+                    surface: SurfaceType::Reflective { reflectivity: 0.5 },
                 },
             }),
         ],
@@ -123,6 +130,7 @@ fn scene() -> Scene {
                 intensity: 100.0,
             }),
         ],
+        max_recursion_depth: 3,
     }
 }
 
